@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Page</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+
+        .fullscreen-button {
+            padding: 20px 40px;
+            /* Reasonable size */
+            background: #000;
+            color: #fff;
+            border: 2px solid #4a148c;
+            border-radius: 10px;
+            font: 24px Impact;
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+        }
+
+
+        .fullscreen-button:hover {
+            background: #4a148c;
+        }
+
+
+        /* Confirmation message style */
+        #confirmation {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1002;
+            display: none;
+            /* Initially hidden */
+        }
+    </style>
+</head>
+
+
+<body>
+    <div id="container">
+        <iframe id="fr" width="100%" height="100%" frameborder="0" allowfullscreen loading="lazy"></iframe>
+        <button class="fullscreen-button" id="fullscreenBtn" aria-label="Open Fullscreen">Press Here</button>
+    </div>
+
+
+    <div id="confirmation">Click The Button!</div> <!-- Confirmation message -->
+
+
+    <script defer>
+        (function() {
+            // GameMonetize SDK Integration
+            window.SDK_OPTIONS = {
+                gameId: "jp112o3o4hzgrnc7zaewjkrfk282pul8",
+                onEvent: function (a) {
+                    switch (a.name) {
+                        case "SDK_GAME_PAUSE":
+                            console.log("Oyun duraklatıldı, reklam gösteriliyor...");
+                            break;
+                        case "SDK_GAME_START":
+                            console.log("Reklam bitti, oyun devam ediyor...");
+                            break;
+                        case "SDK_READY":
+                            console.log("SDK hazır.");
+                            break;
+                    }
+                }
+            };
+
+
+            const DB_NAME = 'GameCacheDB';
+            const STORE_NAME = 'GameFiles';
+            const CACHE_DURATION = 90 * 24 * 60 * 60 * 1000; // 3 months
+            const FILE_URL = 'https://cdn.jsdelivr.net/gh/PlanetDogeCodes/EagletcraftX@main/egcfixed.xml';
+
+
+            function openDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, 1);
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        db.createObjectStore(STORE_NAME, { keyPath: 'url' });
+                    };
+                    request.onsuccess = (event) => resolve(event.target.result);
+                    request.onerror = (event) => reject(event.target.error);
+                });
+            }
+
+
+            async function saveToCache(url, content) {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(STORE_NAME, 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.put({ url: url, content: content, timestamp: Date.now() });
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(new Error('Cache error'));
+                });
+            }
+
+
+            async function getFileFromCache(url) {
+                const db = await openDB();
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(STORE_NAME, 'readonly');
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.get(url);
+                    request.onsuccess = async (event) => {
+                        const data = event.target.result;
+                        if (data && (Date.now() - data.timestamp) < CACHE_DURATION) {
+                            resolve(data.content);
+                        } else {
+                            try {
+                                const response = await fetch(url);
+                                const text = await response.text();
+                                await saveToCache(url, text);
+                                resolve(text);
+                            } catch (err) {
+                                reject(err);
+                            }
+                        }
+                    };
+                    request.onerror = () => reject(new Error('DB error'));
+                });
+            }
+
+
+            function PlayTo(button) {
+                const iframe = document.getElementById("fr");
+                getFileFromCache(FILE_URL).then((text) => {
+                    iframe.contentDocument.open();
+                    iframe.contentDocument.write(text);
+                    iframe.contentDocument.close();
+                    iframe.style.display = "block";
+                    button.style.display = "none";
+
+
+                    iframe.contentWindow.document.addEventListener('pointerdown', showAdOnClick);
+                    iframe.contentWindow.document.addEventListener('touchstart', showAdOnClick);
+                }).catch((err) => {
+                    console.error('Error:', err);
+                    alert('Oyun yüklenemedi.');
+                });
+            }
+
+
+            function openFullscreen() {
+                getFileFromCache(FILE_URL).then((text) => {
+                    const newWindow = window.open("", "_blank");
+                    if (newWindow) {
+                        newWindow.document.open();
+                        newWindow.document.write(text);
+                        newWindow.document.close();
+                    } else {
+                        alert('Tam ekran açılamadı.');
+                    }
+                }).catch((err) => {
+                    console.error('Error:', err);
+                    alert('Tam ekran yüklenemedi.');
+                });
+            }
+
+
+            // Add event listener to the button
+            document.getElementById('fullscreenBtn').addEventListener('click', openFullscreen);
+
+
+            // Show confirmation message
+            document.getElementById('confirmation').style.display = 'block';
+        })();
+    </script>
+</body>
+
+
+</html>
