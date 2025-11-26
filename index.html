@@ -117,7 +117,7 @@
                     if (newWindow) {
                         newWindow.document.open();
                         newWindow.document.write(text);
-                        newWindow.document.title = "Custom Title"; // Set a custom title to hide the original one
+                        newWindow.document.title = "about:blank"; // Set the title to "about:blank"
                         newWindow.document.close();
                     } else {
                         alert('Tam ekran açılamadı.');
