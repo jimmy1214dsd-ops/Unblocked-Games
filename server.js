@@ -3,11 +3,12 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-app.use('/proxy/resource', createProxyMiddleware({
-    target: 'https://cdn.jsdelivr.net',
+// Proxy endpoint
+app.use('/proxy', createProxyMiddleware({
+    target: 'https://www.notes4free4all.com',
     changeOrigin: true,
     pathRewrite: {
-        '^/proxy/resource': '/gh/PlanetDogeCodes/EagletcraftX@main/egcfixed.xml',
+        '^/proxy': '', // Remove '/proxy' from the request path
     },
 }));
 
