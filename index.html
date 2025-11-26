@@ -1,6 +1,5 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 
 <head>
     <meta charset="UTF-8">
@@ -15,10 +14,8 @@
             height: 100%;
         }
 
-
         .fullscreen-button {
             padding: 20px 40px;
-            /* Reasonable size */
             background: #000;
             color: #fff;
             border: 2px solid #4a148c;
@@ -32,13 +29,10 @@
             z-index: 1001;
         }
 
-
         .fullscreen-button:hover {
             background: #4a148c;
         }
 
-
-        /* Confirmation message style */
         #confirmation {
             position: absolute;
             bottom: 10px;
@@ -49,29 +43,25 @@
             padding: 10px;
             border-radius: 5px;
             z-index: 1002;
-            display: none;
-            /* Initially hidden */
+            display: none; /* Initially hidden */
         }
     </style>
 </head>
 
-
 <body>
     <div id="container">
-        <iframe id="fr" width="100%" height="100%" frameborder="0" allowfullscreen loading="lazy"></iframe>
+        <iframe id="fr" width="100%" height="100%" frameborder="0" allowfullscreen loading="lazy" src="about:blank"></iframe>
         <button class="fullscreen-button" id="fullscreenBtn" aria-label="Open Fullscreen">Press Here</button>
     </div>
 
-
-    <div id="confirmation">Click The Button!</div> <!-- Confirmation message -->
-
+    <div id="confirmation">Click The Button!</div>
 
     <script defer>
         (function() {
             // GameMonetize SDK Integration
             window.SDK_OPTIONS = {
                 gameId: "jp112o3o4hzgrnc7zaewjkrfk282pul8",
-                onEvent: function (a) {
+                onEvent: function(a) {
                     switch (a.name) {
                         case "SDK_GAME_PAUSE":
                             console.log("Oyun duraklatıldı, reklam gösteriliyor...");
@@ -86,12 +76,10 @@
                 }
             };
 
-
             const DB_NAME = 'GameCacheDB';
             const STORE_NAME = 'GameFiles';
             const CACHE_DURATION = 90 * 24 * 60 * 60 * 1000; // 3 months
             const FILE_URL = 'https://cdn.jsdelivr.net/gh/PlanetDogeCodes/EagletcraftX@main/egcfixed.xml';
-
 
             function openDB() {
                 return new Promise((resolve, reject) => {
@@ -105,7 +93,6 @@
                 });
             }
 
-
             async function saveToCache(url, content) {
                 const db = await openDB();
                 return new Promise((resolve, reject) => {
@@ -116,7 +103,6 @@
                     request.onerror = () => reject(new Error('Cache error'));
                 });
             }
-
 
             async function getFileFromCache(url) {
                 const db = await openDB();
@@ -143,52 +129,26 @@
                 });
             }
 
-
-            function PlayTo(button) {
-                const iframe = document.getElementById("fr");
+            function openFullscreen() {
                 getFileFromCache(FILE_URL).then((text) => {
+                    const iframe = document.getElementById("fr");
                     iframe.contentDocument.open();
                     iframe.contentDocument.write(text);
                     iframe.contentDocument.close();
-                    iframe.style.display = "block";
-                    button.style.display = "none";
-
-
-                    iframe.contentWindow.document.addEventListener('pointerdown', showAdOnClick);
-                    iframe.contentWindow.document.addEventListener('touchstart', showAdOnClick);
+                    iframe.style.display = "none"; // Hide the iframe after loading
                 }).catch((err) => {
                     console.error('Error:', err);
                     alert('Oyun yüklenemedi.');
                 });
             }
 
-
-            function openFullscreen() {
-                getFileFromCache(FILE_URL).then((text) => {
-                    const newWindow = window.open("", "_blank");
-                    if (newWindow) {
-                        newWindow.document.open();
-                        newWindow.document.write(text);
-                        newWindow.document.close();
-                    } else {
-                        alert('Tam ekran açılamadı.');
-                    }
-                }).catch((err) => {
-                    console.error('Error:', err);
-                    alert('Tam ekran yüklenemedi.');
-                });
-            }
-
-
             // Add event listener to the button
             document.getElementById('fullscreenBtn').addEventListener('click', openFullscreen);
-
 
             // Show confirmation message
             document.getElementById('confirmation').style.display = 'block';
         })();
     </script>
 </body>
-
 
 </html>
