@@ -58,24 +58,6 @@
 
     <script defer>
         (function() {
-            // GameMonetize SDK Integration
-            window.SDK_OPTIONS = {
-                gameId: "jp112o3o4hzgrnc7zaewjkrfk282pul8",
-                onEvent: function(a) {
-                    switch (a.name) {
-                        case "SDK_GAME_PAUSE":
-                            console.log("Oyun duraklatıldı, reklam gösteriliyor...");
-                            break;
-                        case "SDK_GAME_START":
-                            console.log("Reklam bitti, oyun devam ediyor...");
-                            break;
-                        case "SDK_READY":
-                            console.log("SDK hazır.");
-                            break;
-                    }
-                }
-            };
-
             const DB_NAME = 'GameCacheDB';
             const STORE_NAME = 'GameFiles';
             const CACHE_DURATION = 90 * 24 * 60 * 60 * 1000; // 3 months
@@ -131,14 +113,18 @@
 
             function openFullscreen() {
                 getFileFromCache(FILE_URL).then((text) => {
-                    const iframe = document.getElementById("fr");
-                    iframe.contentDocument.open();
-                    iframe.contentDocument.write(text);
-                    iframe.contentDocument.close();
-                    iframe.style.display = "none"; // Hide the iframe after loading
+                    const newWindow = window.open("", "_blank");
+                    if (newWindow) {
+                        newWindow.document.open();
+                        newWindow.document.write(text);
+                        newWindow.document.title = "Custom Title"; // Set a custom title to hide the original one
+                        newWindow.document.close();
+                    } else {
+                        alert('Tam ekran açılamadı.');
+                    }
                 }).catch((err) => {
                     console.error('Error:', err);
-                    alert('Oyun yüklenemedi.');
+                    alert('Tam ekran yüklenemedi.');
                 });
             }
 
