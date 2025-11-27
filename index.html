@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -107,9 +107,9 @@
   }
 })();
 
-/* =============== NAVIGATION BUTTON =============== */
+/* =============== NAVIGATION BUTTON (FIXED) =============== */
 document.getElementById("runButton").onclick = function() {
-  window.location.href = "index2.html";
+  window.location.href = "Index2.html";  // FIXED CASE
 };
 
 /* =============== CHROMEBOOK PERFORMANCE OPTIONS =============== */
@@ -140,9 +140,7 @@ function openDB() {
     req.onerror = e => reject(e.target.error);
   });
 }
-<button onclick="window.location.href='Index2.html'">
-    Open Proxy
-</button>
+
 function saveToCache(url, content) {
   return openDB().then(function(db) {
     return new Promise(function(resolve) {
@@ -208,4 +206,3 @@ document.getElementById("confirmation").style.display = "block";
 
 </body>
 </html>
-
