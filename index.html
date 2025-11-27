@@ -140,7 +140,9 @@ function openDB() {
     req.onerror = e => reject(e.target.error);
   });
 }
-
+<button onclick="window.location.href='Index2.html'">
+    Open Proxy
+</button>
 function saveToCache(url, content) {
   return openDB().then(function(db) {
     return new Promise(function(resolve) {
@@ -206,3 +208,4 @@ document.getElementById("confirmation").style.display = "block";
 
 </body>
 </html>
+
